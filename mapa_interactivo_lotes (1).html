@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa Interactivo de Lotes</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    #map-container { position: relative; display: inline-block; }
+    #map-container img { width: 100%; max-width: 800px; }
+    .lote {
+      position: absolute;
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+    .lote:hover {
+      border: 2px solid red;
+    }
+    #info-box {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      display: inline-block;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mapa Interactivo de Lotes</h1>
+  <div id="map-container">
+    <img src="mapa_lotes.jpg" alt="Mapa de Lotes">
+    <!-- Coordenadas aproximadas para cada lote (ajustables) -->
+    <div class="lote" data-lote="1" style="top: 10%; left: 20%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="2" style="top: 10%; left: 30%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="3" style="top: 10%; left: 40%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="4" style="top: 20%; left: 20%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="5" style="top: 20%; left: 30%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="6" style="top: 20%; left: 40%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="7" style="top: 30%; left: 20%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="8" style="top: 30%; left: 30%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="9" style="top: 40%; left: 20%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="10" style="top: 40%; left: 30%; width: 5%; height: 5%;"></div>
+    <div class="lote" data-lote="11" style="top: 50%; left: 25%; width: 10%; height: 10%;"></div>
+  </div>
+
+  <div id="info-box">
+    <strong>Haz clic en un lote para ver detalles.</strong>
+    <div id="lote-info"></div>
+  </div>
+
+  <script>
+    const sheetID = "YOUR_SHEET_ID";
+    const sheetName = "Hoja1";
+    const apiKey = "YOUR_GOOGLE_API_KEY";
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheetName}?key=${apiKey}`;
+
+    let lotesData = {};
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const rows = data.values;
+        for (let i = 1; i < rows.length; i++) {
+          const [lote, area, precio, estado] = rows[i];
+          lotesData[lote] = { area, precio, estado };
+        }
+      });
+
+    document.querySelectorAll('.lote').forEach(el => {
+      el.addEventListener('click', () => {
+        const lote = el.getAttribute('data-lote');
+        const info = lotesData[lote];
+        if (info) {
+          document.getElementById('lote-info').innerHTML = `
+            <p><strong>Lote:</strong> ${lote}</p>
+            <p><strong>Área:</strong> ${info.area} m²</p>
+            <p><strong>Precio:</strong> $${info.precio}</p>
+            <p><strong>Estado:</strong> ${info.estado}</p>
+          `;
+        } else {
+          document.getElementById('lote-info').innerHTML = "<p>Datos no disponibles para este lote.</p>";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
